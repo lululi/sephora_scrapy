@@ -78,7 +78,7 @@ class SephoraSpider(Spider):
 				
 			yield Request(product_df.loc[n,'links2'], callback=self.parse_detail,
 				meta={'product': product, 'p_id':p_id, 'p_star':p_star, 'brand_name':brand_name,
-				      'p_price': p_price})
+				      'p_price': p_price, 'p_product_url': product_df.loc[n,'links2']})
 
 	def parse_detail(self, response):
 		#time.sleep(0.5)
@@ -89,7 +89,8 @@ class SephoraSpider(Spider):
 		p_star = response.meta['p_star']
 		brand_name = response.meta['brand_name']
 		p_price = response.meta['p_price']
-
+		p_hero_image = "https://www.sephora.com/" + response.xpath('//meta[@property="og:image"]/@content').extract_first()
+		p_product_url = response.meta['p_product_url']
 		p_categories = response.xpath('//a[@class="css-1ylrown "]/text()').extract()
 		p_categories += response.xpath('//h1[@class="css-bnsadm "]/text()').extract()
 
@@ -118,7 +119,8 @@ class SephoraSpider(Spider):
 			time.sleep(0.5)
 			yield Request(url, callback=self.parse_reviews,
 				meta={'product': product, 'p_id':p_id, 'p_star':p_star, 'brand_name':brand_name,
-				'p_categories':p_categories, 'p_num_reviews':p_num_reviews, 'p_price':p_price})
+				'p_categories':p_categories, 'p_num_reviews':p_num_reviews, 'p_price':p_price,
+				'p_hero_image':p_hero_image, 'p_product_url': p_product_url})
 
 	def parse_reviews(self, response):
 		time.sleep(0.5)
@@ -131,6 +133,8 @@ class SephoraSpider(Spider):
 		p_price = response.meta['p_price']
 		p_categories = response.meta['p_categories']
 		p_num_reviews = response.meta['p_num_reviews']
+		p_hero_image = response.meta['p_hero_image']
+		p_product_url = response.meta['p_product_url']
 
 		data = json.loads(response.text)
 		#check keys
@@ -222,6 +226,8 @@ class SephoraSpider(Spider):
 			item['p_price'] = p_price
 			item['p_categories'] = p_categories
 			item['p_num_reviews'] = p_num_reviews 
+			item['p_product_url'] = p_product_url
+			item['p_hero_image'] = p_hero_image
 
     		#all of these needs to be taken from the reviews list/dictionary
 

@@ -31,3 +31,5 @@ class SephoraItem(scrapy.Item):
     r_positive_count = scrapy.Field()
     r_userlocation = scrapy.Field()
     r_title = scrapy.Field()
+    p_product_url = scrapy.Field()
+    p_hero_image = scrapy.Field()
