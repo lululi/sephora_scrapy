@@ -1,2 +1,8 @@
 # sephora_scrapy
-python scrapy code for scraping sephora
+$ virtualenv env --python=python3
+
+$ source env/bin/activate
+
+$ pip install -r requirements.txt
+
+$ scrapy runspider sephora_spider.py
