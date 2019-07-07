@@ -56,7 +56,7 @@ class SephoraSpider(Spider):
             print('Number of products do not match with ratings')
 
         global product_count_tot
-        product_count_tot = len(links2)
+        product_count_tot += len(links2)
 
         product_df = pd.DataFrame({'links2': links2,'product_names': product_names,'p_id': product_ids, 
             'ratings': ratings,'brand_names': brand_names, 'p_price': list_prices})
