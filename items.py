@@ -8,7 +8,7 @@
 from scrapy import Item, Field
 import scrapy
 
-class SephoraItem(scrapy.Item):
+class ReviewItem(scrapy.Item):
     # define the fields for your item here like:
     # name = scrapy.Field()
     brand_name = scrapy.Field()

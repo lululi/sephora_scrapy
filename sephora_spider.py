@@ -1,5 +1,5 @@
 from scrapy import Spider, Request
-from items import SephoraItem
+from items import ReviewItem
 import re
 import pandas as pd
 import json
@@ -223,7 +223,7 @@ class SephoraSpider(Spider):
             count_by_skintype[r_skintype] = count_by_skintype.get(r_skintype, 0) + 1
             rating_by_skintype[r_skintype] = rating_by_skintype.get(r_skintype, 0) + r_star
             
-            item = SephoraItem()
+            item = ReviewItem()
             item['product'] = product
             item['p_id'] = p_id
             item['p_star'] = p_star

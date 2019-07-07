@@ -9,10 +9,10 @@
 #     http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 #     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
 
-BOT_NAME = 'sephora'
+BOT_NAME = 'skincare_reviews'
 
-SPIDER_MODULES = ['sephora.spiders']
-NEWSPIDER_MODULE = 'sephora.spiders'
+SPIDER_MODULES = ['skincare_reviews.spiders']
+NEWSPIDER_MODULE = 'skincare_reviews.spiders'
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
