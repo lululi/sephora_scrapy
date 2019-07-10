@@ -35,31 +35,46 @@ class SephoraSpider(Spider):
         base_url = response.meta['url']
         links = [base_url + '?pageSize=300&currentPage={}'.format(x + 1) for x in range(max_page)]
         for url in links:
-            yield Request(url, callback=self.parse_product)
+            yield Request(url, callback=self.parse_product, meta={'url':url})
         
     def parse_product(self, response):
         #time.sleep(0.5)
-        dictionary = response.xpath('//script[@id="linkJSON"]').extract()
-        dictionary = re.findall('"products":\[(.*?)\]', dictionary[0])[0]
-        
-        product_urls = re.findall('"targetUrl":"(.*?)",', dictionary)
-        product_names = re.findall('"displayName":"(.*?)",', dictionary)
-        product_ids = re.findall('"productId":"(.*?)",', dictionary)
-        ratings = re.findall('"rating":(.*?),', dictionary)
-        brand_names = re.findall('"brandName":"(.*?)",', dictionary)
-        list_prices = re.findall('"listPrice":(.*?),', dictionary)
-        # sale_prices
+        data = response.xpath('//script[@id="linkJSON"]/text()').extract_first()
+        dictionary = json.loads(data)
+        catalog = None
+        for entry in dictionary:
+            if entry['class'] == 'CatalogPage':
+                catalog = entry['props']['products']
+        if catalog == None:
+            return
+        product_urls = [x['targetUrl'] for x in catalog]
+        product_names = [x['displayName'] for x in catalog]
+        product_ids = [x['productId'] for x in catalog]
+        ratings = [x['rating'] for x in catalog]
+        brand_names = [x['brandName'] for x in catalog]
+        list_prices = [x['currentSku']['listPrice'] for x in catalog]
 
         links2 = ["https://www.sephora.com" + link for link in product_urls]
-        if len(product_urls)!=len(ratings)!=len(brand_names):
-            print('Number of products do not match with ratings')
 
         global product_count_tot
         product_count_tot += len(links2)
 
-        product_df = pd.DataFrame({'links2': links2,'product_names': product_names,'p_id': product_ids, 
-            'ratings': ratings,'brand_names': brand_names, 'p_price': list_prices})
-
+        try: 
+            product_df = pd.DataFrame({'links2': links2,'product_names': product_names,'p_id': product_ids, 
+                                       'ratings': ratings,'brand_names': brand_names, 'p_price': list_prices})
+        except:
+            print ('='*50)
+            print('Number of products do not match with ratings')
+            print('currentURL::::::::' + response.meta['url'])
+            print("urls::::::::{}".format(len(product_urls)))
+            print("ratings:::::{}".format(len(ratings)))
+            print("brands::::::{}".format(len(brand_names)))
+            print("products::::{}".format(len(product_names)))
+            print("ids:::::::::{}".format(len(product_ids)))
+            print("prices::::::{}".format(len(list_prices)))
+            print ('='*50)
+            return
+        
         print (product_df.head())
         print (list(product_df.index))
 
