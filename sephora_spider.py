@@ -13,31 +13,30 @@ class SephoraSpider(Spider):
 
     name = "sephora_spider"
     allowed_urls = ["https://www.sephora.com", "https://api.bazaarvoice.com"]
-    #start_urls = ["https://www.sephora.com/brand/list.jsp"]
     start_urls = ["https://www.sephora.com"]
-
-    #first is to collect all the links for all the brands
-    #but this will not be used because the data is just too much. I'll just define the links
 
     def parse(self, response):
         #time.sleep(0.5)
-        #this scrapes all of the brands
-        #links = response.xpath('//a[@class="u-hoverRed u-db u-p1"]//@href').extract()
-        #links = [x + "?products=all" for x in links]
-        
-        #brand_links = ["/fenty-beauty-rihanna", "/kiehls", "/lancome", "/estee-lauder", "/the-ordinary",
-        #"/shiseido", "/sk-ii", "/clinique", "/benefit-cosmetics", "dr-jart", "/chanel", "/nars",
-        #"/laneige", "/urban-decay", "/bobbi-brown"]
-        brand_links = ["/drunk-elephant"]
-        brand_links = [x + "?products=all" for x in brand_links]
+        # category_links = ["/shop/moisturizing-cream-oils-mists", "/shop/cleanser", "shop/facial-treatments",
+        #                   "/shop/eye-treatment-dark-circle-treatment", "/shop/face-mask",
+        #                   "/shop/sunscreen-sun-protection", "/shop/lip-treatments"]
+        category_links = ["/shop/moisturizing-cream-oils-mists"]
 
         #this scrapes only the brands inside brand_links
-        links = ["https://www.sephora.com" + link for link in brand_links]
+        links = ["https://www.sephora.com" + link for link in category_links]
 
         for url in links:
             #time.sleep(0.5)
-            yield Request(url, callback=self.parse_product)
+            yield Request(url, callback=self.parse_page, meta={'url': url})
 
+    def parse_page(self, response):
+        num_products = int(response.xpath('//span[@data-at="number_of_products"]/text()').extract_first()[:-9])
+        max_page = math.ceil(num_products / 300)
+        base_url = response.meta['url']
+        links = [base_url + '?pageSize=300&currentPage={}'.format(x + 1) for x in range(max_page)]
+        for url in links:
+            yield Request(url, callback=self.parse_product)
+        
     def parse_product(self, response):
         #time.sleep(0.5)
         dictionary = response.xpath('//script[@id="linkJSON"]').extract()
@@ -76,11 +75,11 @@ class SephoraSpider(Spider):
             if n>0:
                 time.sleep(1)
 
-            if p_id =='P419222':
-                yield Request(product_df.loc[n,'links2'], callback=self.parse_detail,
-                              meta={'product': product, 'p_id':p_id, 'p_star':p_star, 'brand_name':brand_name,
-                                    'p_price': p_price, 'p_product_url': product_df.loc[n,'links2']})
 
+            yield Request(product_df.loc[n,'links2'], callback=self.parse_detail,
+                          meta={'product': product, 'p_id':p_id, 'p_star':p_star, 'brand_name':brand_name,
+                                'p_price': p_price, 'p_product_url': product_df.loc[n,'links2']})
+                
     def parse_detail(self, response):
         #time.sleep(0.5)
         print ('parse_detail')
@@ -148,8 +147,6 @@ class SephoraSpider(Spider):
 
         n_count = 0
         global n_count_tot, product_count_tot
-        count_by_skintype = {}
-        rating_by_skintype = {}
         
         for review in reviews:
             try:
@@ -217,12 +214,6 @@ class SephoraSpider(Spider):
 
             #need to create an error handler for empty data for reviews
 
-            # print ('BRAND: {} PRODUCT: {}'.format(brand_name, product))
-            # print ('ID: {} STARS: {}'.format(reviewer, r_star))
-            # print ('='*50)
-            count_by_skintype[r_skintype] = count_by_skintype.get(r_skintype, 0) + 1
-            rating_by_skintype[r_skintype] = rating_by_skintype.get(r_skintype, 0) + r_star
-            
             item = ReviewItem()
             item['product'] = product
             item['p_id'] = p_id
@@ -259,13 +250,11 @@ class SephoraSpider(Spider):
         # time.sleep(20)            
         print ('='*50)
         print ('BRAND: {} PRODUCT: {}'.format(brand_name, product))
-        print (count_by_skintype)
-        print (rating_by_skintype)
-        # print ('TOTAL NUMBER OF REVIEWS: {}'.format(int(p_num_reviews)))
-        # print ('TOTAL NUMBER PULLED FOR PRODUCT: {}'.format(len(reviews)))
-        # print ('ACTUAL NUMBER PULLED {}'.format(n_count))
-        # print ('TOTAL NUMBER PULLED {}'.format(n_count_tot))
-        # print ('TOTAL NUMBER PRODUCTS {}'.format(product_count_tot))
+        print ('TOTAL NUMBER OF REVIEWS: {}'.format(int(p_num_reviews)))
+        print ('TOTAL NUMBER PULLED FOR PRODUCT: {}'.format(len(reviews)))
+        print ('ACTUAL NUMBER PULLED {}'.format(n_count))
+        print ('TOTAL NUMBER PULLED {}'.format(n_count_tot))
+        print ('TOTAL NUMBER PRODUCTS {}'.format(product_count_tot))
         print ('='*50)
         time.sleep(10)
 
