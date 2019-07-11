@@ -30,3 +30,6 @@ var/
 
 # PyBuilder
 target/
+
+# Intellij Idea
+.idea/
