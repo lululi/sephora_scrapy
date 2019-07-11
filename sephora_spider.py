@@ -98,7 +98,6 @@ class SephoraSpider(Spider):
     def parse_detail(self, response):
         #time.sleep(0.5)
         print ('parse_detail')
-
         product = response.meta['product']
         p_id = response.meta['p_id']
         p_star = response.meta['p_star']
@@ -106,24 +105,32 @@ class SephoraSpider(Spider):
         p_hero_image = response.meta['p_hero_image']
         p_product_url = response.meta['p_product_url']
 
-        dictionary = response.xpath('//script[@type="application/ld+json"]/text()').extract()
+        data = response.xpath('//script[@type="application/ld+json"]/text()').extract()
+        dictionary = [json.loads(x) for x in data]
+        p_category = None
+        p_prices = []
+        p_sizes = []
         for entry in dictionary:
-            if entry['@type'] == 'BreadcumbList':
-                p_category = entry['itemListElement'][-1]['item']['name']
-            if entry['@type'] == 'Product':
-                p_prices = []
-                for offer in entry['offers']:
-                    p_price.append(offer['price'])
-                p_sizes = []
-                for addition in entry['additionalProperty']:
-                    if addition['name'] == 'size':
-                        p_size.append(addition['value'])
-                if len(p_price) != len(p_size):
-                    raise Error
+            try:
+                if entry['@type'] == 'BreadcumbList':
+                    p_category = entry['itemListElement'][-1]['item']['name']
+                if entry['@type'] == 'Product':
+                    for offer in entry['offers']:
+                        p_prices.append(offer['price'])
+                    if 'additionalProperty' in entry:
+                        for addition in entry['additionalProperty']:
+                            if addition['name'] == 'size':
+                                p_sizes.append(addition['value'])
+                    else:
+                        size_text = response.xpath('//span[count(@*)=0]/text()').extract()
+                        if len(size_text) > 2 and size_text[0] == 'SIZE':
+                            p_sizes.append(size_text[1])
+            except:
+                print("Error processing prices/sizes from following entry:::::")
+                print(entry)
+                print(p_sizes)
                 
-        review_link = 'https://api.bazaarvoice.com/data/reviews.json?Filter=ProductId%3A' +
-            p_id + '&Sort=SubmissionTime%3Adesc&Limit=10&Offset=0' +
-            '&Include=Products%2CComments&Stats=Reviews&passkey=rwbw526r2e7spptqd2qzbkp7&apiversion=5.4'
+        review_link = 'https://api.bazaarvoice.com/data/reviews.json?Filter=ProductId%3A' + p_id + '&Sort=SubmissionTime%3Adesc&Limit=10&Offset=0&Include=Products%2CComments&Stats=Reviews&passkey=rwbw526r2e7spptqd2qzbkp7&apiversion=5.4'
         yield Request(review_link, callback=self.parse_review_count,
                       meta={'product': product, 'p_id':p_id, 'p_star':p_star, 'brand_name':brand_name,
                             'p_category':p_category, 'p_prices':p_prices, 'p_sizes': p_sizes,
@@ -131,6 +138,7 @@ class SephoraSpider(Spider):
 
     def parse_review_count(self, response):
         data = json.loads(response.text)
+        p_id = response.meta['p_id']
         p_num_reviews = data['TotalResults']
         print ('Number of reviews: {}'.format(p_num_reviews))
 
@@ -142,17 +150,18 @@ class SephoraSpider(Spider):
         # up_range = [x*30 for x in list(range(1,max_n+1))]
 
         links3 = ['https://api.bazaarvoice.com/data/reviews.json?Filter=ProductId%3A' +
-            p_id + '&Sort=SubmissionTime%3Adesc&Limit=' + 
-            '100&Offset={}&Include=Products%2CComments&'.format(x) +
+                  p_id + '&Sort=SubmissionTime%3Adesc&Limit=' + 
+                  '100&Offset={}&Include=Products%2CComments&'.format(x) +
                   'Stats=Reviews&passkey=rwbw526r2e7spptqd2qzbkp7&apiversion=5.4' for x in range(max_n)]
 
         for url in links3:
             # time.sleep(0.5)
             yield Request(url, callback=self.parse_reviews,
-                meta={'product': response.meta['product'], 'p_id': response.meta['p_id'], 'p_star': response.meta['p_star'],
-                      'brand_name': response.meta['brand_name'], 'p_category': response.meta['p_category'],
-                      'p_num_reviews': p_num_reviews, 'p_prices': response.meta['p_price'], 'p_sizes': response.meta['p_sizes']
-                      'p_hero_image':p_hero_image, 'p_product_url': p_product_url})
+                meta={'product': response.meta['product'], 'p_id': response.meta['p_id'],
+                      'p_star': response.meta['p_star'], 'brand_name': response.meta['brand_name'],
+                      'p_category': response.meta['p_category'], 'p_num_reviews': p_num_reviews,
+                      'p_prices': response.meta['p_prices'], 'p_sizes': response.meta['p_sizes'],
+                      'p_hero_image': response.meta['p_hero_image'], 'p_product_url': response.meta['p_product_url']})
 
     def parse_reviews(self, response):
         # time.sleep(0.5)

@@ -21,7 +21,7 @@ class ReviewItem(scrapy.Item):
     p_prices = scrapy.Field()
     # if there are multiple sizes, this will be a list field sorting from the smallest
     # to the largest
-    p_size = scrapy.Field()
+    p_sizes = scrapy.Field()
     p_num_reviews = scrapy.Field()
     p_tags = scrapy.Field()
     reviewer = scrapy.Field()
