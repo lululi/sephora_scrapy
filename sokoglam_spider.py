@@ -18,65 +18,60 @@ class SokoglamSpider(Spider):
     #first is to collect all the links for all the pages
     def parse(self, response):
         #time.sleep(0.5)
-        #scrapes pages
-        pages = response.xpath('//span[@class="page"]//a/text()').extract()
-        max_page = max([int(x) for x in pages])
-
-        for page_num in range(max_page):
-            #time.sleep(0.5)
-            url = "https://sokoglam.com/collections/skincare?page={}".format(page_num)
-            yield Request(url, callback=self.parse_product)
-
-    def parse_product(self, response):
-        selected = response.xpath('//script[contains(text(),"\'products\': [")]').extract()
-        dictionary = re.findall('var product = \{(.*?)\};', selected[0], re.DOTALL)[0]
-
-        product_ids = re.findall('\'id\'\s*:\s\'(.*?)\'', dictionary, re.DOTALL)
-        product_urls = re.findall('\'productURL\'\s*:\s\'(.*?)\'', dictionary, re.DOTALL)
-        product_names = re.findall('\'name\'\s*:\s\"(.*?)\"', dictionary, re.DOTALL)
-        list_prices = re.findall('\'price\'\s*:\s\'(.*?)\'', dictionary, re.DOTALL)
-        product_categories = re.findall('\'productType\'\s*:\s\"(.*?)\"', dictionary, re.DOTALL)
-        image_urls = re.findall('\'imageURL\'\s*:\s\"(.*?)\"', dictionary, re.DOTALL)
-
+        product_ids = response.xpath('//div[has-class("product-grid-item")]/@data-id').extract()
+        product_names = response.xpath('//div[has-class("product-grid-item")]/@data-name').extract()
+        product_urls = response.xpath('//div[@class="yotpo bottomLine"]/@data-url').extract()
+        image_urls = ['https:' + re.sub(r'%3Fv=\d+', '', x) for x in response.xpath('//div[@class="yotpo bottomLine"]/@data-image-url').extract()]
+        list_prices = response.xpath('//span[@class="ProductPrice"]/text()').extract()
+        product_brands = response.xpath('//span[@class="product__vendor"]/a/text()').extract()
         global product_count_tot
         product_count_tot += len(product_urls)
 
         product_df = pd.DataFrame({'product_urls': product_urls,'product_names': product_names,'p_id': product_ids, 
-                                   'p_category': product_categories, 'p_image': image_urls, 'p_price': list_prices})
-
+                                   'p_image': image_urls, 'p_price': list_prices, 'p_brand': product_brands})
         print (product_df.head())
         print (list(product_df.index))
 
         for n in list(product_df.index):
             product = product_df.loc[n, 'product_names']
             p_id = product_df.loc[n, 'p_id']
-            p_category = product_df.loc[n, 'p_category']
             p_price = product_df.loc[n, 'p_price']
             p_image = product_df.loc[n, 'p_image']
-
+            p_brand = product_df.loc[n, 'p_brand']
+            
             print ('{}::: {}'.format(n, product_df.loc[n, 'product_urls']))
 
             yield Request(product_df.loc[n, 'product_urls'], callback=self.parse_detail,
-                          meta = {'product': product, 'p_id': p_id, 'p_category': p_category,
+                          meta = {'product': product, 'p_id': p_id, 'p_brand': p_brand,
                                   'p_price': p_price, 'p_url': product_df.loc[n, 'product_urls'],
                                   'p_image': p_image})
-
+            
     def parse_detail(self, response):
+        time.sleep(1)
         product = response.meta['product']
         p_id = response.meta['p_id']
-        p_category = response.meta['p_category']
+        p_category = re.findall('"type":"(.*?)",', response.xpath('//script[contains(text(), "var meta = {")]/text()').extract_first())
         p_price = response.meta['p_price']
         p_url = response.meta['p_url']
         p_image = response.meta['p_image']
-        p_brand = response.xpath('//meta[@name="vendor"]/@content').extract_first()
-        p_star = float(response.xpath('//span[@itemprop="ratingValue"]/text()').extract_first())
-        p_num_reviews = int(response.xpath('//span[@itemprop="ratingCount"]/text()').extract_first())
+        p_brand = response.meta['p_brand']
+        try:
+            p_star = float(response.xpath('//span[@itemprop="ratingValue"]/text()').extract_first())
+        except:
+            p_star = None
+        try:
+            p_num_reviews = int(response.xpath('//span[@itemprop="ratingCount"]/text()').extract_first())
+        except:
+            p_num_reviews = 0
+
+        if p_num_reviews == 0:
+            return
 
         max_page = math.ceil(p_num_reviews/150)
 
         review_links = ['https://api.yotpo.com/v1/widget/kILjLgKH3AFJKWu0W8HoD8nuvs72obqsSPmWjHiG/products/' +
                         p_id + '/reviews.json?per_page=150&page={}'.format(x) for x in range(1, max_page + 1)]
-
+        time.sleep(1)
         for url in review_links:
             yield Request(url, callback=self.parse_review,
                           meta={'product': product, 'p_id': p_id, 'p_star': p_star, 'p_brand': p_brand,
@@ -138,8 +133,8 @@ class SokoglamSpider(Spider):
             item['p_id'] = p_id
             item['p_star'] = p_star
             item['brand_name'] = p_brand
-            item['p_price'] = p_price
-            item['p_categories'] = p_category
+            item['p_prices'] = [p_price]
+            item['p_category'] = p_category
             item['p_num_reviews'] = p_num_reviews 
             item['p_product_url'] = p_url
             item['p_hero_image'] = p_image
