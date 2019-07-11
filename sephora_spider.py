@@ -52,7 +52,7 @@ class SephoraSpider(Spider):
         product_ids = [x['productId'] for x in catalog]
         ratings = [x['rating'] for x in catalog]
         brand_names = [x['brandName'] for x in catalog]
-        list_prices = [x['currentSku']['listPrice'] for x in catalog]
+        image_urls = ["https://www.sephora.com/" + x['image250'] for x in catalog]
 
         links2 = ["https://www.sephora.com" + link for link in product_urls]
 
@@ -61,7 +61,7 @@ class SephoraSpider(Spider):
 
         try: 
             product_df = pd.DataFrame({'links2': links2,'product_names': product_names,'p_id': product_ids, 
-                                       'ratings': ratings,'brand_names': brand_names, 'p_price': list_prices})
+                                       'ratings': ratings,'brand_names': brand_names, 'image_urls': image_urls})
         except:
             print ('='*50)
             print('Number of products do not match with ratings')
@@ -71,7 +71,7 @@ class SephoraSpider(Spider):
             print("brands::::::{}".format(len(brand_names)))
             print("products::::{}".format(len(product_names)))
             print("ids:::::::::{}".format(len(product_ids)))
-            print("prices::::::{}".format(len(list_prices)))
+            print("images::::::{}".format(len(image_urls)))
             print ('='*50)
             return
         
@@ -83,7 +83,7 @@ class SephoraSpider(Spider):
             p_id = product_df.loc[n, 'p_id']
             p_star = product_df.loc[n, 'ratings']
             brand_name = product_df.loc[n, 'brand_names']
-            p_price = product_df.loc[n, 'p_price']
+            p_hero_image = product_df.loc[n, 'image_urls']
 
             print (product_df.loc[n,'links2'])
 
@@ -93,7 +93,7 @@ class SephoraSpider(Spider):
 
             yield Request(product_df.loc[n,'links2'], callback=self.parse_detail,
                           meta={'product': product, 'p_id':p_id, 'p_star':p_star, 'brand_name':brand_name,
-                                'p_price': p_price, 'p_product_url': product_df.loc[n,'links2']})
+                                'p_product_url': product_df.loc[n,'links2'], 'p_hero_image': p_hero_image})
                 
     def parse_detail(self, response):
         #time.sleep(0.5)
@@ -103,19 +103,35 @@ class SephoraSpider(Spider):
         p_id = response.meta['p_id']
         p_star = response.meta['p_star']
         brand_name = response.meta['brand_name']
-        p_price = response.meta['p_price']
-        p_hero_image = "https://www.sephora.com/" + response.xpath('//meta[@property="og:image"]/@content').extract_first()
+        p_hero_image = response.meta['p_hero_image']
         p_product_url = response.meta['p_product_url']
-        p_categories = response.xpath('//a[@class="css-1ylrown "]/text()').extract()
-        p_categories += response.xpath('//h1[@class="css-bnsadm "]/text()').extract()
 
-        p_num_reviews = response.xpath('//a[@data-comp="RatingsSummary Flex Box"]/span/text()').extract()
-        p_num_reviews = p_num_reviews[0]
-        p_num_reviews = p_num_reviews.replace('s', '')
-        p_num_reviews = p_num_reviews.replace(' review', '')
-        p_num_reviews = p_num_reviews.replace('K', '000')
-        p_num_reviews = int(p_num_reviews)
+        dictionary = response.xpath('//script[@type="application/ld+json"]/text()').extract()
+        for entry in dictionary:
+            if entry['@type'] == 'BreadcumbList':
+                p_category = entry['itemListElement'][-1]['item']['name']
+            if entry['@type'] == 'Product':
+                p_prices = []
+                for offer in entry['offers']:
+                    p_price.append(offer['price'])
+                p_sizes = []
+                for addition in entry['additionalProperty']:
+                    if addition['name'] == 'size':
+                        p_size.append(addition['value'])
+                if len(p_price) != len(p_size):
+                    raise Error
+                
+        review_link = 'https://api.bazaarvoice.com/data/reviews.json?Filter=ProductId%3A' +
+            p_id + '&Sort=SubmissionTime%3Adesc&Limit=10&Offset=0' +
+            '&Include=Products%2CComments&Stats=Reviews&passkey=rwbw526r2e7spptqd2qzbkp7&apiversion=5.4'
+        yield Request(review_link, callback=self.parse_review_count,
+                      meta={'product': product, 'p_id':p_id, 'p_star':p_star, 'brand_name':brand_name,
+                            'p_category':p_category, 'p_prices':p_prices, 'p_sizes': p_sizes,
+                            'p_hero_image':p_hero_image, 'p_product_url': p_product_url})
 
+    def parse_review_count(self, response):
+        data = json.loads(response.text)
+        p_num_reviews = data['TotalResults']
         print ('Number of reviews: {}'.format(p_num_reviews))
 
         #create code here that creates a list of urls for calling the reviews
@@ -127,15 +143,16 @@ class SephoraSpider(Spider):
 
         links3 = ['https://api.bazaarvoice.com/data/reviews.json?Filter=ProductId%3A' +
             p_id + '&Sort=SubmissionTime%3Adesc&Limit=' + 
-            '{}&Offset={}&Include=Products%2CComments&'.format(min(int(p_num_reviews - x*100), 100), x*100) +
-                  'Stats=Reviews&passkey=rwbw526r2e7spptqd2qzbkp7&apiversion=5.4' for x in list(range(0, max_n))]
+            '100&Offset={}&Include=Products%2CComments&'.format(x) +
+                  'Stats=Reviews&passkey=rwbw526r2e7spptqd2qzbkp7&apiversion=5.4' for x in range(max_n)]
 
         for url in links3:
             # time.sleep(0.5)
             yield Request(url, callback=self.parse_reviews,
-                meta={'product': product, 'p_id':p_id, 'p_star':p_star, 'brand_name':brand_name,
-                'p_categories':p_categories, 'p_num_reviews':p_num_reviews, 'p_price':p_price,
-                'p_hero_image':p_hero_image, 'p_product_url': p_product_url})
+                meta={'product': response.meta['product'], 'p_id': response.meta['p_id'], 'p_star': response.meta['p_star'],
+                      'brand_name': response.meta['brand_name'], 'p_category': response.meta['p_category'],
+                      'p_num_reviews': p_num_reviews, 'p_prices': response.meta['p_price'], 'p_sizes': response.meta['p_sizes']
+                      'p_hero_image':p_hero_image, 'p_product_url': p_product_url})
 
     def parse_reviews(self, response):
         # time.sleep(0.5)
@@ -145,15 +162,14 @@ class SephoraSpider(Spider):
         p_id = response.meta['p_id']
         p_star = response.meta['p_star']
         brand_name = response.meta['brand_name']
-        p_price = response.meta['p_price']
-        p_categories = response.meta['p_categories']
+        p_prices = response.meta['p_prices']
+        p_sizes = response.meta['p_sizes']
+        p_category = response.meta['p_category']
         p_num_reviews = response.meta['p_num_reviews']
         p_hero_image = response.meta['p_hero_image']
         p_product_url = response.meta['p_product_url']
 
         data = json.loads(response.text)
-        #check keys
-        #data.keys()
         reviews = data['Results'] #this is a list
         #each element inside reviews is a dictionary
         #tmp[0].keys() will give the keys of the dictionaries inside reviews
@@ -234,8 +250,9 @@ class SephoraSpider(Spider):
             item['p_id'] = p_id
             item['p_star'] = p_star
             item['brand_name'] = brand_name
-            item['p_price'] = p_price
-            item['p_categories'] = p_categories
+            item['p_prices'] = p_prices
+            item['p_sizes'] = p_sizes
+            item['p_category'] = p_category
             item['p_num_reviews'] = p_num_reviews 
             item['p_product_url'] = p_product_url
             item['p_hero_image'] = p_hero_image
