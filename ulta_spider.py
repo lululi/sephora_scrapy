@@ -1,4 +1,5 @@
 from scrapy import Spider, Request
+from lxml import html
 from items import ReviewItem
 import re
 import pandas as pd
@@ -34,7 +35,7 @@ class ULTASpider(Spider):
         base_url = response.meta['current_url'] 
         for x in range(max_page):
             url = base_url + "&No={}&Nrpp=96".format(96 * (x-1))
-            yield Request(url, callback = self.parse_product)
+            yield Request(url, callback = self.parse_product, meta = {'url': url})
         
     def parse_product(self, response):
         product_ids = response.xpath('//div[@class="productQvContainer"]/@id').extract()
@@ -48,16 +49,35 @@ class ULTASpider(Spider):
         product_names = response.xpath('//p[@class="prod-desc"]//a/text()').extract()
         product_names = [x.strip() for x in product_names]
 
-        list_prices = response.xpath('//span[@class="regPrice"]/text()').extract()
-        list_prices = [x.strip() for x in product_names]
+        list_prices_raw = response.xpath('//div[@class="productPrice"]').extract()
+        list_prices = []
+        for x in list_prices_raw:
+            html_x = html.fromstring(x)
+            if len(html_x.xpath('//span[@class="regPrice"]/text()')) == 0:
+                list_prices.append(html_x.xpath('//span[@class="pro-new-price"]/text()')[0].strip())
+            else:
+                list_prices.append(html_x.xpath('//span[@class="regPrice"]/text()')[0].strip())
 
         image_urls = [response.xpath('//img[@name="' + x + '"]/@src').extract() for x in product_ids]
 
         global product_count_tot
         product_count_tot += len(product_urls)
 
-        product_df = pd.DataFrame({'product_urls': product_urls,'product_names': product_names,'p_id': product_ids, 
-                                   'p_brand': product_brands, 'p_image': image_urls, 'p_price': list_prices})
+        try:
+            product_df = pd.DataFrame({'product_urls': product_urls,'product_names': product_names,'p_id': product_ids, 
+                                       'p_brand': product_brands, 'p_image': image_urls, 'p_price': list_prices})
+        except:
+            print ('='*50)
+            print('Number of products do not match with ratings')
+            print('currentURL::::::::' + response.meta['url'])
+            print("urls::::::::{}".format(len(product_urls)))
+            print("brands::::::{}".format(len(product_brands)))
+            print("products::::{}".format(len(product_names)))
+            print("ids:::::::::{}".format(len(product_ids)))
+            print("images::::::{}".format(len(image_urls)))
+            print("prices::::::{}".format(len(list_prices)))
+            print ('='*50)
+            return
 
         print (product_df.head())
         print (list(product_df.index))
@@ -174,8 +194,8 @@ class ULTASpider(Spider):
                 item['p_id'] = p_id
                 item['p_star'] = p_star
                 item['brand_name'] = p_brand
-                item['p_price'] = p_price
-                item['p_categories'] = p_category
+                item['p_prices'] = [p_price]
+                item['p_category'] = p_category
                 item['p_num_reviews'] = p_num_reviews 
                 item['p_product_url'] = p_url
                 item['p_hero_image'] = p_image
