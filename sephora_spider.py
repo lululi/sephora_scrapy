@@ -123,13 +123,13 @@ class SephoraSpider(Spider):
                                 p_sizes.append(addition['value'])
                     else:
                         size_text = response.xpath('//span[count(@*)=0]/text()').extract()
-                        if len(size_text) > 2 and size_text[0] == 'SIZE':
-                            p_sizes.append(size_text[1])
+                        if len(size_text) > 2 and size_text[0].strip() == 'SIZE':
+                            p_sizes.append(size_text[1].strip())
             except:
                 print("Error processing prices/sizes from following entry:::::")
                 print(entry)
                 print(p_sizes)
-                
+
         review_link = 'https://api.bazaarvoice.com/data/reviews.json?Filter=ProductId%3A' + p_id + '&Sort=SubmissionTime%3Adesc&Limit=10&Offset=0&Include=Products%2CComments&Stats=Reviews&passkey=rwbw526r2e7spptqd2qzbkp7&apiversion=5.4'
         yield Request(review_link, callback=self.parse_review_count,
                       meta={'product': product, 'p_id':p_id, 'p_star':p_star, 'brand_name':brand_name,
