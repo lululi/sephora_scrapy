@@ -42,3 +42,15 @@ class ReviewItem(scrapy.Item):
     p_product_url = scrapy.Field()
     p_hero_image = scrapy.Field()
     p_large_image = scrapy.Field()
+
+class ProductContent(scrapy.Item):
+    product_name = scrapy.Field()
+    ingredients = scrapy.Field()
+    
+class IngredientItem(scrapy.Item):
+    ingredient_name = scrapy.Field()
+    function = scrapy.Field()
+    acne_rating = scrapy.Field()
+    irr_rating = scrapy.Field()
+    safe_rating = scrapy.Field()
+    
