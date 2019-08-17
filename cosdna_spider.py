@@ -10,7 +10,24 @@ import time
 class CosdnaSpider(Spider):
 
     name = "cosdna_spider"
-    start_urls = ["http://www.cosdna.com/eng/cosmetic_ec3a411293.html"]
+    start_urls = [
+        "http://www.cosdna.com/eng/cosmetic_ec3a411293.html",
+        "http://www.cosdna.com/eng/cosmetic_dde3332362.html",
+        "http://www.cosdna.com/eng/cosmetic_a529354667.html",
+        "http://www.cosdna.com/eng/cosmetic_7ddd377593.html",
+        "http://www.cosdna.com/eng/cosmetic_fa56376868.html",
+        "http://www.cosdna.com/eng/cosmetic_e5b2360798.html",
+        "http://www.cosdna.com/eng/cosmetic_1403380975.html",
+        "http://www.cosdna.com/eng/cosmetic_5e74427261.html",
+        "http://www.cosdna.com/eng/cosmetic_f8de448825.html",
+        "http://www.cosdna.com/eng/cosmetic_7a94387725.html",
+        "http://www.cosdna.com/eng/cosmetic_47e5283513.html",
+        "http://www.cosdna.com/eng/cosmetic_c25a402077.html",
+        "http://www.cosdna.com/eng/cosmetic_312d431514.html",
+        "http://www.cosdna.com/eng/cosmetic_a40f276455.html",
+        "http://www.cosdna.com/eng/cosmetic_ffd8374394.html",
+        "http://www.cosdna.com/eng/cosmetic_8e28155044.html"
+    ]
     def parse(self, response):
         product_name = response.xpath('//span[has-class("ProdTitleName")]/text()').extract_first()
         product = ProductContent()
@@ -45,7 +62,7 @@ class CosdnaSpider(Spider):
         antioxidant = 0
         anti_inflammatory = 0
         anti_allergic = 0
-        astrigent = 0
+        astringent = 0
         # cell_regeneration = 0
         acne = 0
         irritant = 0
@@ -56,6 +73,8 @@ class CosdnaSpider(Spider):
         non_sunscreen = filter(lambda x: 'Sunscreen' not in x['function'], product['ingredients'])
         for num, ingredient in enumerate(non_sunscreen):
             weight = start - num * increment
+            if weight < 0:
+                weight = 0
             if 'Moisturizer' in ingredient['function']:
                 moisturizer += 1 * weight
             if 'Emollient' in ingredient['function']:
@@ -66,8 +85,8 @@ class CosdnaSpider(Spider):
                 anti_inflammatory += 1 * weight
             if 'Anti-allergic' in ingredient['function']:
                 anti_allergic += 1 * weight
-            if 'Astrigent' in ingredient['function']:
-                astrigent += 1 * weight
+            if 'Astringent' in ingredient['function']:
+                astringent += 1 * weight
 
             acne_rating = [int(x) for x in ingredient['acne_rating'].split('-')]
             irr_rating = [int(x) for x in ingredient['irr_rating'].split('-')]
@@ -76,9 +95,10 @@ class CosdnaSpider(Spider):
             irritant += sum(irr_rating)/len(irr_rating) * weight
             hazard += sum(safe_rating)/len(safe_rating) * weight
 
+        print(product['product_name'])
         print('moisturizer: ', moisturizer)
         print('emollient: ', emollient)
-        print('astrigent: ', astrigent)
+        print('astringent: ', astringent)
         print('antioxidant: ', antioxidant)
         print('anti_inflammatory: ', anti_inflammatory)
         print('anti_allergic: ', anti_allergic)

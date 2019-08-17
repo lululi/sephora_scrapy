@@ -1,0 +1,160 @@
+EltaMD UV Clear Broad-Spectrum SPF 46
+moisturizer:  23.25
+emollient:  19.0
+astringent:  7.75
+antioxidant:  8.0
+anti_inflammatory:  0
+anti_allergic:  0
+acne:  7.0
+irritant:  0.0
+hazard:  81.75
+Anthelios Mineral Ultra Light Sunscreen Fluid SPF 50
+moisturizer:  17.5
+emollient:  65.75
+astringent:  2.75
+antioxidant:  3.25
+anti_inflammatory:  0
+anti_allergic:  0
+acne:  18.0
+irritant:  13.25
+hazard:  165.75
+EltaMD UV Physical Broad Spectrum SPF 41 Sunscreen
+moisturizer:  26.0
+emollient:  23.25
+astringent:  0
+antioxidant:  19.0
+anti_inflammatory:  0
+anti_allergic:  0
+acne:  79.0
+irritant:  44.5
+hazard:  142.25
+Supergoop! Unseen Sunscreen Broad Spectrum SPF 40
+moisturizer:  31.0
+emollient:  63.0
+astringent:  5.75
+antioxidant:  11.75
+anti_inflammatory:  5.0
+anti_allergic:  0
+acne:  35.5
+irritant:  20.5
+hazard:  147.0
+Physical Fusion UV Defense Spf 50
+moisturizer:  10.25
+emollient:  77.0
+astringent:  0
+antioxidant:  2.5
+anti_inflammatory:  0
+anti_allergic:  0
+acne:  24.25
+irritant:  10.25
+hazard:  183.75
+Urban Environment Oil-Free UV Protector Broad Spectrum Face Sunscreen SPF 42
+moisturizer:  33.25
+emollient:  25.5
+astringent:  5.75
+antioxidant:  6.75
+anti_inflammatory:  21.0
+anti_allergic:  0
+acne:  101.75
+irritant:  21.75
+hazard:  184.125
+Suntegrity Skincare 5 in 1 Natural Moisturizing Face Sunscreen, Tinted, SPF 30
+moisturizer:  20.5
+emollient:  54.5
+astringent:  0
+antioxidant:  20.75
+anti_inflammatory:  0
+anti_allergic:  0
+acne:  25.75
+irritant:  8.25
+hazard:  138.0
+Drunk Elephant Umbra Sheer Physical Daily Defense Broad Spectrum Sunscreen SPF 30
+moisturizer:  57.0
+emollient:  43.0
+astringent:  0
+antioxidant:  33.25
+anti_inflammatory:  0
+anti_allergic:  0
+acne:  53.0
+irritant:  47.5
+hazard:  183.25
+Supergoop! Everyday Sunscreen Broad Spectrum SPF 50
+moisturizer:  20.5
+emollient:  60.0
+astringent:  3.0
+antioxidant:  0.25
+anti_inflammatory:  1.0
+anti_allergic:  1.0
+acne:  63.0
+irritant:  33.25
+hazard:  190.0
+TATCHA Silken Pore Perfecting Sunscreen Broad Spectrum SPF 35 PA+++ 60 ML | 2 FL. OZ.
+moisturizer:  27.25
+emollient:  44.0
+astringent:  0
+antioxidant:  5.75
+anti_inflammatory:  0
+anti_allergic:  7.0
+acne:  8.5
+irritant:  0.0
+hazard:  197.625
+COOLA Full Spectrum 360° Sun Silk Drops SPF 30
+moisturizer:  35.0
+emollient:  34.5
+astringent:  0
+antioxidant:  4.5
+anti_inflammatory:  7.0
+anti_allergic:  0
+acne:  42.0
+irritant:  14.5
+hazard:  161.0
+REN CLEAN SKINCARE Clean Screen Mattifying Face Sunscreen SPF 30
+moisturizer:  22.75
+emollient:  33.75
+astringent:  0
+antioxidant:  9.75
+anti_inflammatory:  0
+anti_allergic:  0
+acne:  20.0
+irritant:  20.0
+hazard:  197.625
+Obagi Sun Shield Matte Broad Spectrum SPF 50
+moisturizer:  9.5
+emollient:  39.75
+astringent:  0
+antioxidant:  11.0
+anti_inflammatory:  0
+anti_allergic:  0
+acne:  33.25
+irritant:  18.5
+hazard:  122.5
+Murad City Skin Age Defense Broad Spectrum SPF 50 PA++++
+moisturizer:  49.5
+emollient:  52.5
+astringent:  0
+antioxidant:  34.75
+anti_inflammatory:  12.5
+anti_allergic:  0
+acne:  32.0
+irritant:  7.0
+hazard:  167.75
+MILD ESSENCE SUN MILK
+moisturizer:  35.75
+emollient:  28.0
+astringent:  10.75
+antioxidant:  17.0
+anti_inflammatory:  4.25
+anti_allergic:  0
+acne:  66.0
+irritant:  0.0
+hazard:  114.25
+The Ordinary Mineral UV Filters SPF 30 with Antioxidants
+moisturizer:  55.5
+emollient:  37.5
+astringent:  0
+antioxidant:  36.25
+anti_inflammatory:  2.25
+anti_allergic:  1.0
+acne:  0.0
+irritant:  0.0
+hazard:  171.5
