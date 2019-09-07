@@ -6,7 +6,9 @@
 # http://doc.scrapy.org/en/latest/topics/items.html
 
 from scrapy import Item, Field
+import json
 import scrapy
+
 
 class ReviewItem(scrapy.Item):
     # define the fields for your item here like:
@@ -43,14 +45,15 @@ class ReviewItem(scrapy.Item):
     p_hero_image = scrapy.Field()
     p_large_image = scrapy.Field()
 
+
 class ProductContent(scrapy.Item):
     product_name = scrapy.Field()
     ingredients = scrapy.Field()
-    
+
+
 class IngredientItem(scrapy.Item):
     ingredient_name = scrapy.Field()
     function = scrapy.Field()
     acne_rating = scrapy.Field()
     irr_rating = scrapy.Field()
     safe_rating = scrapy.Field()
-    
