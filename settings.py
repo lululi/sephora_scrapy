@@ -65,8 +65,9 @@ DOWNLOAD_DELAY = 4
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'sephora.pipelines.ValidateItemPipeline': 100,
-    'sephora.pipelines.WriteItemPipeline': 300
+    # 'sephora.pipelines.ValidateItemPipeline': 100,
+    # 'sephora.pipelines.WriteItemPipeline': 300,
+    'sephora.pipelines.EwgScraperPipeline': 400,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
