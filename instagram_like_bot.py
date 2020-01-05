@@ -21,28 +21,26 @@ comment_dict = {
     10: "Love it!"
 }
 
-# ad = "Great info!👏 If you care about what you put on your face, we recently launched a search engine for skincare at glowism.com. You could look up skincare products' ingredients information and reviews. You could also create a skin profile to have the information personalized for you. Check it out and let us know what you think 🥰'"
+ad = "Great info!👏 If you care about what you put on your face, we recently launched a search engine for skincare at glowism.com. You could look up skincare products' ingredients information and reviews. You could also create a skin profile to have the information personalized for you. Check it out and let us know what you think 🥰'"
 
-ad = "This is great!"
-with webdriver.Chrome() as webdriver:
+with webdriver.Firefox() as webdriver:
     wait = WebDriverWait(webdriver, 10)
     webdriver.get('https://www.instagram.com/accounts/login/?source=auth_switcher')
     sleep(1)
     
     username = webdriver.find_element_by_name('username')
-    username.send_keys('theteraway')
+    username.send_keys('glowism_')
     password = webdriver.find_element_by_name('password')
     password.send_keys('t3rat3ra2019')
 
     button_login = webdriver.find_element_by_xpath("//button[./div/text()='Log In']")
-    print("found button::::::", button_login.text)
     button_login.click()
     button_notnow = WebDriverWait(webdriver, 10).until(
         EC.visibility_of_element_located((By.XPATH, "//button[./text()='Not Now']")))
     button_notnow.click()
     sleep(2)
     
-    hashtag_list = ['travel']
+    hashtag_list = ['skinscience']
     for hashtag in hashtag_list:
         webdriver.get('https://www.instagram.com/explore/tags/'+ hashtag + '/')
         sleep(1)
@@ -51,9 +49,11 @@ with webdriver.Chrome() as webdriver:
         first_thumbnail.click()
         sleep(randint(1,2))
         likes = 0
-        try:        
-            while likes < 2:
-                username = webdriver.find_element_by_xpath('//a[@class="FPmhX notranslate  nJAzx"]').text
+
+        while likes < 100:
+            try:        
+                username = WebDriverWait(webdriver, 10).until(
+                    EC.visibility_of_element_located((By.XPATH, '//a[@class="FPmhX notranslate  nJAzx"]'))).text
                 button_like = webdriver.find_element_by_xpath('//span[starts-with(@class,"glyphsSpriteHeart__")]')
                 if button_like.get_attribute("aria-label") == "Like":
                     button_like.click()
@@ -61,24 +61,29 @@ with webdriver.Chrome() as webdriver:
                     comment_box = webdriver.find_element_by_xpath('//textarea[@class="Ypffh"]')
                     comment_box.click()
                     comment = ''
-                    if username in prev_user_list:
-                        comm_choice = randint(1,10)
-                        comment = comment_dict[comm_choice]
-                    else:
-                        comment = ad
-                        prev_user_list.append(username)
+                    comm_choice = randint(1,10)
+                    comment = comment_dict[comm_choice]
+
+                    # if username in prev_user_list:
+                    #     comm_choice = randint(1,10)
+                    #     comment = comment_dict[comm_choice]
+                    # else:
+                    #     comment = ad
+                    #     prev_user_list.append(username)
                     print(comment)
                     comment_box = webdriver.find_element_by_xpath('//textarea[starts-with(@class, "Ypffh")]')
                     comment_box.send_keys(comment)
                     comment_box.send_keys(Keys.ENTER)
-                    sleep(5)
+                    sleep(randint(20, 30))
                 button_next = webdriver.find_element_by_xpath("//a[./text()='Next']")
                 button_next.click()
                 sleep(randint(1,2))
-        except Exception as e:
-            print(e)
-            continue        
+            except Exception as e:
+                print(e)
+                continue        
 
+    content = ''
+    for item in prev_user_list:
+        content += item + '\n'
     with open('users_advertised_list.txt', 'w') as f:
-        for item in prev_user_list:
-            f.write("%s\n" % item)
+        f.write(content)
