@@ -541,3 +541,9 @@ Exiting due to channel error.
 Exiting due to channel error.
 [GFX1-]: Receive IPC close with reason=AbnormalShutdown
 Exiting due to channel error.
+1599148962195	geckodriver	INFO	Listening on 127.0.0.1:62450
+1599148963205	mozrunner::runner	INFO	Running command: "/Applications/Firefox.app/Contents/MacOS/firefox-bin" "--marionette" "-foreground" "-no-remote" "-profile" "/var/folders/g6/05h4r3bx2fzghtmh25z3yrx40000gq/T/rust_mozprofileN54YJn"
+console.error: SearchCache: "_readCacheFile: Error reading cache file:" (new Error("", "(unknown module)"))
+1599148966404	Marionette	INFO	Listening on port 62470
+1599148966465	Marionette	WARN	TLS certificate errors will be ignored for this session
+1599149088400	Marionette	INFO	Stopped listening on port 62470

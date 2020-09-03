@@ -89,7 +89,7 @@ def scrape_detail_info():
         sleep(2)
         idx = 0
 
-        with open('influencer_info.txt', 'w') as f:
+        with open('influencer_info.txt', 'a') as f:
             for username in influencer_list:
                 if idx < 262:
                     idx += 1
@@ -105,6 +105,7 @@ def scrape_detail_info():
                     sleep(1)
 
                     followers = webdriver.find_element_by_xpath('//*[@id="react-root"]/section/main/div/header/section/ul/li[2]/a').text
+                    followers.replace(",", "")
                     name = webdriver.find_element_by_xpath('//*[@class="-vDIg"]/h1').text
                     bio_website = None
                     try:
