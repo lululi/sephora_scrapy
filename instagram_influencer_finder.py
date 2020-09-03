@@ -77,9 +77,9 @@ def scrape_detail_info():
         sleep(1)
 
         username = webdriver.find_element_by_name('username')
-        username.send_keys('hello@glowism.com')
+        username.send_keys('cylimomo')
         password = webdriver.find_element_by_name('password')
-        password.send_keys('glowglow2020')
+        password.send_keys('iris_222286')
 
         button_login = webdriver.find_element_by_xpath("//button[./div/text()='Log In']")
         button_login.click()
@@ -91,7 +91,7 @@ def scrape_detail_info():
 
         with open('influencer_info.txt', 'a') as f:
             for username in influencer_list:
-                if idx < 262:
+                if idx < 266:
                     idx += 1
                     print("********")
                     print(idx)
@@ -105,8 +105,10 @@ def scrape_detail_info():
                     sleep(1)
 
                     followers = webdriver.find_element_by_xpath('//*[@id="react-root"]/section/main/div/header/section/ul/li[2]/a').text
-                    followers.replace(",", "")
+                    followers = followers.replace(",", "")
                     name = webdriver.find_element_by_xpath('//*[@class="-vDIg"]/h1').text
+                    if name:
+                        name = name.replace(",", "|")
                     bio_website = None
                     try:
                         bio_website = webdriver.find_element_by_xpath('//*[@class="-vDIg"]/a').text
