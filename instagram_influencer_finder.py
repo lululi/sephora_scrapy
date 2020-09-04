@@ -72,26 +72,26 @@ def scrape_influencer_by_hashtag():
 def scrape_detail_info():
     influencer_list = [line.rstrip('\n') for line in open('influencer_list.txt', 'r')]
     with WebDriver.Firefox() as webdriver:
-        wait = WebDriverWait(webdriver, 10)
-        webdriver.get('https://www.instagram.com/accounts/login/?source=auth_switcher')
-        sleep(1)
-
-        username = webdriver.find_element_by_name('username')
-        username.send_keys('cylimomo')
-        password = webdriver.find_element_by_name('password')
-        password.send_keys('iris_222286')
-
-        button_login = webdriver.find_element_by_xpath("//button[./div/text()='Log In']")
-        button_login.click()
-        button_notnow = WebDriverWait(webdriver, 10).until(
-            EC.visibility_of_element_located((By.XPATH, "//button[./text()='Not Now']")))
-        button_notnow.click()
-        sleep(2)
+        # wait = WebDriverWait(webdriver, 10)
+        # webdriver.get('https://www.instagram.com/accounts/login/?source=auth_switcher')
+        # sleep(1)
+        #
+        # username = webdriver.find_element_by_name('username')
+        # username.send_keys('chenyaoli19@gmail.com')
+        # password = webdriver.find_element_by_name('password')
+        # password.send_keys('2iR^dA0i$5')
+        #
+        # button_login = webdriver.find_element_by_xpath("//button[./div/text()='Log In']")
+        # button_login.click()
+        # button_notnow = WebDriverWait(webdriver, 10).until(
+        #     EC.visibility_of_element_located((By.XPATH, "//button[./text()='Not Now']")))
+        # button_notnow.click()
+        # sleep(2)
         idx = 0
 
         with open('influencer_info.txt', 'a') as f:
             for username in influencer_list:
-                if idx < 266:
+                if idx < 986:
                     idx += 1
                     print("********")
                     print(idx)

@@ -15,6 +15,7 @@ product_count_tot = 0
 SOURCE_FILE_PATH = '/Users/cyl/Desktop/dermstore/'
 REVIEW_PAGE_SIZE = 1000
 
+
 class DermStoreSpider(Spider):
     name = "dermstore_spider"
 
